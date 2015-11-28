@@ -57,7 +57,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151127.01"
+VERSION = "20151128.01"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -187,15 +187,20 @@ class WgetArgs(object):
         item_name = item['item_name']
         assert ':' in item_name
         item_sort, item_item, item_file = item_name.split(':', 2)
+
+        MAX_SIZE = 10737418240
         
         item_list = requests.get('http://archive.org/download/{0}/{1}'.format(item_item, item_file))
         if item_list.status_code != 200:
             raise Exception('You received status code %d with URL %s'%(item_list.status_code, 'https://archive.org/download/{0}/{1}'.format(item_item, item_file)))
+        itemsize = int(re.search(r'ITEM_TOTAL_SIZE: ([0-9]+)', item_list.text).group(1))
+        if itemsize > MAX_SIZE:
+            raise Exception('Item is %d bytes. This is larger then %d bytes.'%(itemsize, MAX_SIZE))
         for url in item_list.text.splitlines():
             if url.startswith('ftp://'):
                 url = url.replace('&#32;', '%20')
                 if '#' in url:
-                    raise Exception('Your URL %s contained a \'#\'.'%(url))
+                    raise Exception('%s containes a bad character.'%(url))
                 else:
                     wget_args.append("{0}".format(url))
 
@@ -232,7 +237,7 @@ pipeline = Pipeline(
     WgetDownload(
         WgetArgs(),
         max_tries=2,
-        accept_on_exit_code=[0, 4, 7, 8],
+        accept_on_exit_code=[0, 4],
         env={
             "item_dir": ItemValue("item_dir"),
             "downloader": downloader
@@ -272,4 +277,3 @@ pipeline = Pipeline(
         stats=ItemValue("stats")
     )
 )
-
