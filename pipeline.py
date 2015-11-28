@@ -7,6 +7,7 @@ import socket
 import shutil
 import time
 import sys
+import urllib
 try:
     import requests
 except ImportError:
@@ -57,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151128.01"
+VERSION = "20151128.02"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -199,6 +200,7 @@ class WgetArgs(object):
         for url in item_list.text.splitlines():
             if url.startswith('ftp://'):
                 url = url.replace('&#32;', '%20')
+                url = urllib.unquote(url)
                 if '#' in url:
                     raise Exception('%s containes a bad character.'%(url))
                 else:
@@ -237,7 +239,7 @@ pipeline = Pipeline(
     WgetDownload(
         WgetArgs(),
         max_tries=2,
-        accept_on_exit_code=[0, 4],
+        accept_on_exit_code=[0, 4, 7, 8],
         env={
             "item_dir": ItemValue("item_dir"),
             "downloader": downloader
