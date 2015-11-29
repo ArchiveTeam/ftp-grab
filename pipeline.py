@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151128.02"
+VERSION = "20151129.01"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -175,7 +175,7 @@ class WgetArgs(object):
             "--no-cookies",
             "--rotate-dns",
             "--timeout", "30",
-            "--tries", "2",
+            "--tries", "7",
             "--wait", "0.5",
             "--random-wait",
             "--waitretry", "5",
