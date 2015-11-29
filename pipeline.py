@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151129.02"
+VERSION = "20151129.03"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -150,12 +150,14 @@ def get_hash(filename):
 
 CWD = os.getcwd()
 PIPELINE_SHA1 = get_hash(os.path.join(CWD, 'pipeline.py'))
+SCRIPT_SHA1 = get_hash(os.path.join(CWD, 'ftp.py'))
 
 
 def stats_id_function(item):
     # For accountability and stats.
     d = {
         'pipeline_hash': PIPELINE_SHA1,
+        'script_hash': SCRIPT_SHA1,
         'python_version': sys.version,
         }
 
@@ -167,6 +169,7 @@ class WgetArgs(object):
         wget_args = [
             WPULL_EXE,
             "-nv",
+            "--python-script", "ftp.py",
             "-o", ItemInterpolation("%(item_dir)s/wpull.log"),
             "--no-check-certificate",
             "--database", ItemInterpolation("%(item_dir)s/wpull.db"),
@@ -174,8 +177,8 @@ class WgetArgs(object):
             "--no-robots",
             "--no-cookies",
             "--rotate-dns",
-            "--timeout", "30",
-            "--tries", "7",
+            "--timeout", "60",
+            "--tries", "inf",
             "--wait", "0.5",
             "--random-wait",
             "--waitretry", "5",
@@ -239,7 +242,7 @@ pipeline = Pipeline(
     WgetDownload(
         WgetArgs(),
         max_tries=2,
-        accept_on_exit_code=[0, 8],
+        accept_on_exit_code=[0, 4, 8],
         env={
             "item_dir": ItemValue("item_dir"),
             "downloader": downloader
