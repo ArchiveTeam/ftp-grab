@@ -1,4 +1,5 @@
 import sys
+import urllib.request
 
 wpull_hook = globals().get('wpull_hook') # silence code checkers
 tries = 0
@@ -25,10 +26,17 @@ def handle_response(url_info, record_info, response_info):
 def handle_error(url_info, record_info, error_info):
     global tries
     global max_tries
-    tries += 1
-    if tries >= max_tries:
-        raise Exception('Something went wrong... ABORTING...')
+    if tries >= max_tries - 2:
+        try:
+            urllib.request.urlopen(url_info["url"])
+        except Exception as error:
+            error_message = str(error)
+            if tries >= max_tries:
+                if '550' in error_message and 'No such file or directory' in error_message:
+                    return wpull_hook.actions.FINISH
+                raise Exception('Something went wrong... ABORTING...')
     max_tries = 5
+    tries += 1
 
 wpull_hook.callbacks.handle_response = handle_response
 wpull_hook.callbacks.handle_error = handle_error
