@@ -39,20 +39,21 @@ def handle_error(url_info, record_info, error_info):
         item_file = re.search(r'^ftp:\/\/([^/]+)', url_info['url']).group(1) + '_file_not_found'
 
     item_message = urllib.request.urlopen('http://archive.org/download/{0}/{1}'.format(item_item, item_file))
-    if item_message.getcode() != 200:
+    if not item_message.getcode() in (200, 404):
         raise Exception('You received status code %d with URL %s'%(item_list.status_code, 'https://archive.org/download/{0}/{1}'.format(item_item, item_file)))
     item_message_text = item_message.read()
 
-    try:
-        urllib.request.urlopen(url_info["url"])
-    except Exception as error:
-        error_message = str(error)
-        print("ERROR Received error message " + error_message)
-        sys.stdout.flush()
-        if all(text in error_message for text in item_message_text.decode('utf-8').split('/NONEXISTINGFILEdgdjahxnedadbacxjbc')):
-            print('INFO ' + url_info['url'] + ' does not exist, skipping...')
+    if item_message.getcode() == 200:
+        try:
+            urllib.request.urlopen(url_info["url"])
+        except Exception as error:
+            error_message = str(error)
+            print("ERROR Received error message " + error_message)
             sys.stdout.flush()
-            return wpull_hook.actions.FINISH
+            if all(text in error_message for text in item_message_text.decode('utf-8').split('/NONEXISTINGFILEdgdjahxnedadbacxjbc')):
+                print('INFO ' + url_info['url'] + ' does not exist, skipping...')
+                sys.stdout.flush()
+                return wpull_hook.actions.FINISH
 
     if tries >= max_tries:
         raise Exception('Something went wrong... ABORTING...')
