@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151201.01"
+VERSION = "20151204.01"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -192,6 +192,8 @@ class WgetArgs(object):
         assert ':' in item_name
         item_sort, item_item, item_file = item_name.split(':', 2)
 
+        item['item_item'] = item_item
+
         MAX_SIZE = 10737418240
         
         item_list = requests.get('http://archive.org/download/{0}/{1}'.format(item_item, item_file))
@@ -245,6 +247,7 @@ pipeline = Pipeline(
         accept_on_exit_code=[0, 4, 8],
         env={
             "item_dir": ItemValue("item_dir"),
+            "item_item": ItemValue("item_item"),
             "downloader": downloader
         }
     ),
