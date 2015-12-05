@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151205.01"
+VERSION = "20151205.02"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -206,6 +206,8 @@ class WgetArgs(object):
             if url.startswith('ftp://'):
                 url = url.replace('&#32;', '%20').replace('&amp;', '&')
                 url = urllib.unquote(url)
+                if item_item == 'archiveteam_ftp_items_2015120102':
+                    url = url.replace('ftp://ftp.research.microsoft.com/downloads/downloads/', 'ftp://ftp.research.microsoft.com/downloads/')
                 if '#' in url:
                     raise Exception('%s containes a bad character.'%(url))
                 else:
