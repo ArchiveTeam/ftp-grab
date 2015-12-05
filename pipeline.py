@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20151204.02"
+VERSION = "20151205.01"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 

@@ -42,6 +42,10 @@ def handle_error(url_info, record_info, error_info):
     if not item_message.getcode() in (200, 404):
         raise Exception('You received status code %d with URL %s'%(item_list.status_code, 'https://archive.org/download/{0}/{1}'.format(item_item, item_file)))
     item_message_text = item_message.read()
+    if '/NONEXISTINGFILEdgdjahxnedadbacxjbc' in item_message_text.decode('utf-8'):
+        item_messages = item_message_text.decode('utf-8').split('/NONEXISTINGFILEdgdjahxnedadbacxjbc')
+    else:
+        item_messages = item_message_text.decode('utf-8').split('NONEXISTINGFILEdgdjahxnedadbacxjbc')
 
     if item_message.getcode() == 200:
         try:
@@ -50,7 +54,7 @@ def handle_error(url_info, record_info, error_info):
             error_message = str(error)
             print("ERROR Received error message " + error_message)
             sys.stdout.flush()
-            if all(text in error_message for text in item_message_text.decode('utf-8').split('/NONEXISTINGFILEdgdjahxnedadbacxjbc')):
+            if all(text in error_message for text in item_messages):
                 print('INFO ' + url_info['url'] + ' does not exist, skipping...')
                 sys.stdout.flush()
                 return wpull_hook.actions.FINISH
