@@ -58,7 +58,7 @@ if not WPULL_EXE:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20160228.02"
+VERSION = "20160304.01"
 TRACKER_ID = 'ftp'
 TRACKER_HOST = 'tracker.archiveteam.org'
 
@@ -196,17 +196,20 @@ class WgetArgs(object):
 
         MAX_SIZE = 10737418240
         
-        ####### Working again #######
-        ## this FTP site is dead
-        #if 'dotdb.strw.leidenuniv.nl' in item_file:
-        #    raise Exception('This FTP is gone. Skipping.')
+        skipped = requests.get('https://raw.githubusercontent.com/ArchiveTeam/ftp-items/master/skipped_sites')
+        if skipped.status_code != 200:
+            raise Exception('Something went wrong getting the skipped_sites list from GitHub. ABORTING.')
+        skipped_items = skipped.text.splitlines()
+        for skipped_item in skipped_items:
+            if item_file.startswith(skipped_item):
+                raise Exception('This FTP will be skipped...')
         
         item_list = requests.get('http://archive.org/download/{0}/{1}'.format(item_item, item_file))
         if item_list.status_code != 200:
-            raise Exception('You received status code %d with URL %s'%(item_list.status_code, 'https://archive.org/download/{0}/{1}'.format(item_item, item_file)))
+            raise Exception('You received status code %d with URL %s. ABORTING.'%(item_list.status_code, 'https://archive.org/download/{0}/{1}'.format(item_item, item_file)))
         itemsize = int(re.search(r'ITEM_TOTAL_SIZE: ([0-9]+)', item_list.text).group(1))
         if itemsize > MAX_SIZE:
-            raise Exception('Item is %d bytes. This is larger then %d bytes.'%(itemsize, MAX_SIZE))
+            raise Exception('Item is %d bytes. This is larger then %d bytes. ABORTING.'%(itemsize, MAX_SIZE))
         for url in item_list.text.splitlines():
             if url.startswith('ftp://'):
                 url = url.replace('&#32;', '%20').replace('&amp;', '&')
